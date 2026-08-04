@@ -1,4 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import (
+    AbstractBaseUser, 
+    PermissionsMixin, 
+    UserManager,
+)
 
 class Organization(models.Model):
     org_id = models.BigAutoField(primary_key=True)
@@ -9,21 +14,28 @@ class Organization(models.Model):
         return self.org_name
 
 
-class User(models.Model):
+class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.BigAutoField(primary_key=True)
     org = models.ForeignKey(
         Organization, 
         on_delete=models.CASCADE, 
         related_name='users'
     )
+    username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
-    is_org_admin = models.BooleanField(default=False)
+    
+    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'full_name', 'org']
+
+    objects = UserManager()
+
     def __str__(self):
-        return f"{self.full_name} ({self.email})"
+        return f"{self.full_name} ({self.username})"
 
 
 class UserCredentialInvite(models.Model):
@@ -32,6 +44,7 @@ class UserCredentialInvite(models.Model):
         ('ACCEPTED', 'Accepted'),
         ('EXPIRED', 'Expired'),
     ]
+
     invite_id = models.BigAutoField(primary_key=True)
     org = models.ForeignKey(
         Organization, 
@@ -41,22 +54,30 @@ class UserCredentialInvite(models.Model):
     user = models.OneToOneField(
         User, 
         on_delete=models.CASCADE, 
-        related_name='invite',
-        null=True, 
-        blank=True
+        related_name='invite'
     )
     invite_token = models.CharField(max_length=255, unique=True)
-    invite_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')
+    invite_status = models.CharField(
+        max_length=50, 
+        choices=STATUS_CHOICES, 
+        default='PENDING'
+    )
     accepted_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Invite {self.invite_token} for Org {self.org_id}"
+        return f"Invite {self.invite_token} for {self.user.email}"
 
 
 class OrganizationSubscription(models.Model):
-    stripe_subscription_id = models.CharField(max_length=255, primary_key=True)
+    stripe_subscription = models.OneToOneField(
+        'djstripe.Subscription', 
+        on_delete=models.CASCADE, 
+        to_field='id', 
+        primary_key=True,
+        db_column='stripe_subscription_id'
+    )
     org = models.OneToOneField(
         Organization, 
         on_delete=models.CASCADE, 
@@ -64,7 +85,7 @@ class OrganizationSubscription(models.Model):
     )
 
     def __str__(self):
-        return self.stripe_subscription_id
+        return str(self.pk)
 
 
 class Project(models.Model):
@@ -135,19 +156,21 @@ class ProjectShare(models.Model):
         on_delete=models.CASCADE, 
         related_name='project_shares'
     )
-    permission_level = models.CharField(max_length=50, choices=PERMISSION_CHOICES)
+    permission_level = models.CharField(
+        max_length=50, 
+        choices=PERMISSION_CHOICES
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.grantee_user.email} - {self.project.project_name} ({self.permission_level})"
+        return f"{self.grantee_user.username} - {self.project.project_name} ({self.permission_level})"
 
 
 class DocumentShare(models.Model):
     PERMISSION_CHOICES = [
         ('VIEWER', 'Viewer'),
         ('EDITOR', 'Editor'),
-        ('ADMIN', 'Admin'),
     ]
 
     document_share_id = models.BigAutoField(primary_key=True)
@@ -161,10 +184,13 @@ class DocumentShare(models.Model):
         on_delete=models.CASCADE, 
         related_name='document_shares'
     )
-    permission_level = models.CharField(max_length=50, choices=PERMISSION_CHOICES)
+    permission_level = models.CharField(
+        max_length=50, 
+        choices=PERMISSION_CHOICES
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.grantee_user.email} - {self.document.document_title} ({self.permission_level})"
-    
+        return f"{self.grantee_user.username} - {self.document.document_title} ({self.permission_level})"
+        
