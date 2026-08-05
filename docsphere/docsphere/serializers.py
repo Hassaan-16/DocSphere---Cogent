@@ -1,51 +1,46 @@
 from rest_framework import serializers
 from .models import Organization, User, OrganizationSubscription
 
+
 class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(
-        source='stripe_subscription.status', 
-        read_only=True
-    )
+    status = serializers.CharField(source="stripe_subscription.status", read_only=True)
     current_period_end = serializers.DateTimeField(
-        source='stripe_subscription.current_period_end', 
-        read_only=True
+        source="stripe_subscription.current_period_end", read_only=True
     )
     plan_name = serializers.CharField(
-        source='stripe_subscription.plan.product.name', 
-        read_only=True, 
-        default='N/A'
+        source="stripe_subscription.plan.product.name", read_only=True, default="N/A"
     )
 
     class Meta:
         model = OrganizationSubscription
         fields = [
-            'stripe_subscription', 
-            'org', 
-            'status', 
-            'plan_name', 
-            'current_period_end'
+            "stripe_subscription",
+            "org",
+            "status",
+            "plan_name",
+            "current_period_end",
         ]
-        read_only_fields = ['stripe_subscription', 'org']
+        read_only_fields = ["stripe_subscription", "org"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['org_id', 'org_name', 'created_at']
-        read_only_fields = ['org_id', 'created_at']
+        fields = ["org_id", "org_name", "created_at"]
+        read_only_fields = ["org_id", "created_at"]
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'user_id', 
-            'username', 
-            'email', 
-            'full_name', 
-            'org', 
-            'is_active', 
-            'is_staff', 
-            'created_at'
+            "user_id",
+            "username",
+            "email",
+            "full_name",
+            "org",
+            "is_active",
+            "is_staff",
+            "created_at",
         ]
-        read_only_fields = ['user_id', 'created_at']
+        read_only_fields = ["user_id", "created_at"]

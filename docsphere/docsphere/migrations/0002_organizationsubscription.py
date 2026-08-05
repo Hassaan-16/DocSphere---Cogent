@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0003_2_11"),
         ("docsphere", "0001_initial"),
