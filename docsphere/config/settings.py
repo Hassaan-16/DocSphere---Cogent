@@ -27,7 +27,7 @@ DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
 STRIPE_TEST_PUBLIC_KEY = "pk_test_placeholder"
 STRIPE_TEST_SECRET_KEY = "sk_test_placeholder"
-STRIPE_LIVE_MODE = False  
+STRIPE_LIVE_MODE = False
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -36,7 +36,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-AUTH_USER_MODEL = 'docsphere.User'
+AUTH_USER_MODEL = "docsphere.User"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -45,11 +45,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "djstripe",
     "silk",
-
     "docsphere",
 ]
 
@@ -76,17 +74,16 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                'django.template.context_processors.request',
+                "django.template.context_processors.request",
             ],
         },
     },
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-
 }
 
 WSGI_APPLICATION = "config.wsgi.application"
@@ -122,12 +119,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': True,
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 
