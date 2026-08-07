@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -21,8 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-af1fe!ruwhhr$l!&x3o7ic)c0=+d--+bn0vi1vwfn7vnf#ro_4"
-
+SECRET_KEY = os.environ.get("DJ_SECRET_KEY", "dev-secret-key")
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
 STRIPE_TEST_PUBLIC_KEY = "pk_test_placeholder"
@@ -30,13 +30,12 @@ STRIPE_TEST_SECRET_KEY = "sk_test_placeholder"
 STRIPE_LIVE_MODE = False
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # Application definition
-AUTH_USER_MODEL = "docsphere.User"
+# AUTH_USER_MODEL = "docsphere.User"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -95,7 +94,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": os.environ.get("SQLITE_DB_PATH", str(BASE_DIR / "db.sqlite3")),
     }
 }
 
@@ -139,8 +138,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
