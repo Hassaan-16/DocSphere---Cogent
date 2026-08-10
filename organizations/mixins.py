@@ -8,7 +8,6 @@ class ActiveSubscriptionMixin:
 
     def get_permissions(self):
         permissions = super().get_permissions()
-
         permissions.append(IsSubscriptionActive())
 
         return permissions

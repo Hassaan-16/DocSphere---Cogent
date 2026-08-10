@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class IsSubscriptioinActive(permissions.BasePermission):
+class IsSubscriptionActive(permissions.BasePermission):
     """
     Allows access only if the user's organization has an active Stripe subscription.
     """
@@ -18,5 +18,6 @@ class IsSubscriptioinActive(permissions.BasePermission):
         try:
             subscription = request.user.org.subscription.stripe_subscription
             return subscription.status == "active"
+
         except AttributeError:
             return False
