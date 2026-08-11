@@ -1,16 +1,27 @@
-from django.db import models
+from django.apps import apps
 from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
     BaseUserManager,
 )
-from django.apps import apps
+from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
+    """
+    Custom User Manager to handle user and superuser creation:
+    tailored to seamlessly intercept strings and auto-create Organization objects.
+    """
+
     def create_user(
         self, username, email, full_name, org, password=None, **extra_fields
     ):
+        """
+        Creates, saves, and returns a user with the given credentials.
+
+        Automatically resolves or creates the required Organization if
+        a string is provided given the organization does not exist yet.
+        """
         if not email:
             raise ValueError("Users must have an email address.")
 
@@ -29,11 +40,16 @@ class CustomUserManager(BaseUserManager):
         )
         user.set_password(password)
         user.save(using=self._db)
+
         return user
 
     def create_superuser(
         self, username, email, full_name, password=None, **extra_fields
     ):
+        """
+        Creates and returns a superuser. Automatically assigns the user to a
+        default "Admin HQ" organization to bypass CLI foreign key restrictions.
+        """
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -53,6 +69,11 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """
+    Custom user model representing system accounts.
+    Enforces a mandatory relationship with an Organization.
+    """
+
     user_id = models.BigAutoField(primary_key=True)
     org = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="users"
@@ -71,10 +92,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     def __str__(self):
+        """Returns the user's full name alongside their username."""
+
         return f"{self.full_name} ({self.username})"
 
 
 class UserCredentialInvite(models.Model):
+    """
+    Represents an invitation sent to a prospective user, complete with
+    a secure token, expiration time, and acceptance status.
+    """
+
     STATUS_CHOICES = [
         ("PENDING", "Pending"),
         ("ACCEPTED", "Accepted"),
@@ -95,4 +123,6 @@ class UserCredentialInvite(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        """Returns a formatted string containing the invite token and target email."""
+
         return f"Invite {self.invite_token} for {self.user.email}"

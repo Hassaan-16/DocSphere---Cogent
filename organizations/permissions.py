@@ -3,12 +3,17 @@ from rest_framework import permissions
 
 class IsSubscriptionActive(permissions.BasePermission):
     """
-    Allows access only if the user's organization has an active Stripe subscription.
+    Custom DRF permission class that strictly allows access only if
+    the requesting user's organization possesses an active Stripe subscription.
+    Superusers automatically bypass this check.
     """
 
     message = "Your organization's subscription is inactive or expired."
 
     def has_permission(self, request, view):
+        """
+        Determines whether the incoming request possesses active subscription privileges.
+        """
         if request.user.is_superuser:
             return True
 

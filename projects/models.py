@@ -3,6 +3,11 @@ from django.conf import settings
 
 
 class Project(models.Model):
+    """
+    Represents a high-level project container within an Organization.
+    Used to group and organize related documents.
+    """
+
     project_id = models.BigAutoField(primary_key=True)
     org = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="projects"
@@ -19,10 +24,17 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Returns the project's name."""
+
         return self.project_name
 
 
 class ProjectShare(models.Model):
+    """
+    Manages access control and explicit permissions (Viewer, Editor, Admin)
+    granted to specific users for a given Project.
+    """
+
     PERMISSION_CHOICES = [
         ("VIEWER", "Viewer"),
         ("EDITOR", "Editor"),
@@ -43,4 +55,6 @@ class ProjectShare(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Returns the grantee's username, project name, and permission level."""
+
         return f"{self.grantee_user.username} - {self.project.project_name} ({self.permission_level})"

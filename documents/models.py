@@ -3,6 +3,11 @@ from django.conf import settings
 
 
 class Document(models.Model):
+    """
+    Represents an individual document containing content text.
+    Must be nested beneath a parent Project.
+    """
+
     document_id = models.BigAutoField(primary_key=True)
     project = models.ForeignKey(
         "projects.Project", on_delete=models.CASCADE, related_name="documents"
@@ -25,10 +30,17 @@ class Document(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Returns the document's title."""
+
         return self.document_title
 
 
 class DocumentShare(models.Model):
+    """
+    Manages granular access control (Viewer, Editor) granted to
+    specific users for an individual Document.
+    """
+
     PERMISSION_CHOICES = [
         ("VIEWER", "Viewer"),
         ("EDITOR", "Editor"),
@@ -48,4 +60,6 @@ class DocumentShare(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Returns the grantee's username, document title, and permission level."""
+
         return f"{self.grantee_user.username} - {self.document.document_title} ({self.permission_level})"

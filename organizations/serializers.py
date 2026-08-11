@@ -3,6 +3,13 @@ from .models import Organization, OrganizationSubscription
 
 
 class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the OrganizationSubscription model.
+
+    Extracts read-only fields directly from the linked Stripe subscription object
+    to provide the client with plan names, status, and renewal dates.
+    """
+
     status = serializers.CharField(source="stripe_subscription.status", read_only=True)
     current_period_end = serializers.DateTimeField(
         source="stripe_subscription.current_period_end", read_only=True
@@ -24,6 +31,10 @@ class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the core Organization model.
+    """
+
     class Meta:
         model = Organization
         fields = ["org_id", "org_name", "created_at"]
