@@ -2,8 +2,54 @@ from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
-    UserManager,
+    BaseUserManager,
 )
+from django.apps import apps
+
+
+class CustomUserManager(BaseUserManager):
+    def create_user(
+        self, username, email, full_name, org, password=None, **extra_fields
+    ):
+        if not email:
+            raise ValueError("Users must have an email address.")
+
+        email = self.normalize_email(email)
+
+        Organization = apps.get_model("organizations", "Organization")
+
+        if isinstance(org, str):
+            org_instance, created = Organization.objects.get_or_create(org_name=org)
+            org = org_instance
+        elif isinstance(org, int):
+            org = Organization.objects.get(pk=org)
+
+        user = self.model(
+            username=username, email=email, full_name=full_name, org=org, **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(
+        self, username, email, full_name, password=None, **extra_fields
+    ):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self.create_user(
+            username,
+            email,
+            full_name,
+            org="Admin HQ",
+            password=password,
+            **extra_fields,
+        )
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -20,9 +66,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email", "full_name", "org"]
+    REQUIRED_FIELDS = ["email", "full_name"]
 
-    objects = UserManager()
+    objects = CustomUserManager()
 
     def __str__(self):
         return f"{self.full_name} ({self.username})"

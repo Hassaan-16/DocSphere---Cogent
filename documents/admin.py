@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, ProjectShare
+from .models import Document, DocumentShare
 
-admin.site.register(Project)
-admin.site.register(ProjectShare)
+admin.site.register(Document)
+admin.site.register(DocumentShare)
