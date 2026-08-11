@@ -20,21 +20,12 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from rest_framework.routers import DefaultRouter
 
-# from docsphere.views import (
-#     UserViewSet,
-#     OrganizationViewSet,
-#     OrganizationSubscriptionViewSet,
-# )
-
 router = DefaultRouter()
-# router.register(r"organizations", OrganizationViewSet, basename="organization")
-# router.register(r"users", UserViewSet, basename="user")
-# router.register(
-#     r"subscriptions", OrganizationSubscriptionViewSet, basename="subscription"
-# )
 
 urlpatterns = [
-    path("", RedirectView.as_view(url="admin/")),
+    path("", RedirectView.as_view(url="/admin/", permanent=False)),
+    path("api/", include("organizations.urls")),
+    path("api/", include("users.urls")),
     path("admin/", admin.site.urls),
     path("silk/", include("silk.urls", namespace="silk")),
     path("api/", include(router.urls)),
