@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, UserCredentialInvite
+from .models import User, UserInvitation
 
 admin.site.register(User)
-admin.site.register(UserCredentialInvite)
+admin.site.register(UserInvitation)

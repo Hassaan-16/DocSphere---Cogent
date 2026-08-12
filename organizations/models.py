@@ -1,40 +1,54 @@
+"""Organization models."""
+
+from djstripe.models import Customer
 from django.db import models
 
+from core.models.abstract import TimeStampedModel
 
-class Organization(models.Model):
-    """
-    Represents company within the system.
-    All users, projects, and subscriptions are linked to an Organization.
-    """
 
-    org_id = models.BigAutoField(primary_key=True)
+class Organization(TimeStampedModel):
+    """Represents an organization within the system."""
+
     org_name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    stripe_customer_id = models.CharField(
+        max_length=255, unique=True, null=True, blank=True
+    )
+
+    @property
+    def active_subscription(self):
+        """Return the active djstripe Subscription for this organization."""
+        if not self.stripe_customer_id:
+            return None
+
+        try:
+            customer = Customer.objects.get(id=self.stripe_customer_id)
+            return (
+                customer.subscriptions.filter(status="active")
+                .select_related("plan__product")
+                .first()
+            )
+
+        except Customer.DoesNotExist:
+            return None
+
+    @property
+    def subscription_status(self):
+        """Return the status of the active subscription."""
+        sub = self.active_subscription
+        return sub.status if sub else None
+
+    @property
+    def current_plan_name(self):
+        """Return the name of the current subscription plan."""
+        sub = self.active_subscription
+        return sub.plan.product.name if sub and sub.plan else None
+
+    @property
+    def current_period_end(self):
+        """Return the end date of the current subscription period."""
+        sub = self.active_subscription
+        return sub.current_period_end if sub else None
 
     def __str__(self):
-        """Returns the string representation of the Organization."""
-
+        """Return the organization name."""
         return self.org_name
-
-
-class OrganizationSubscription(models.Model):
-    """
-    Links an Organization to a Stripe Subscription for billing purposes.
-    Maintains a one-to-one relationship with both Organization and djstripe.Subscription.
-    """
-
-    stripe_subscription = models.OneToOneField(
-        "djstripe.Subscription",
-        on_delete=models.CASCADE,
-        to_field="id",
-        primary_key=True,
-        db_column="stripe_subscription_id",
-    )
-    org = models.OneToOneField(
-        Organization, on_delete=models.CASCADE, related_name="subscription"
-    )
-
-    def __str__(self):
-        """Returns the primary key as the string representation."""
-
-        return str(self.pk)

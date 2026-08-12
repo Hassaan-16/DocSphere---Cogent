@@ -1,128 +1,57 @@
-from django.apps import apps
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    PermissionsMixin,
-    BaseUserManager,
-)
+"""User models."""
+
+from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
+from core.constants.invitations import InvitationStatus
+from core.models.abstract import OrganizationOwnedModel, TimeStampedModel
 
-class CustomUserManager(BaseUserManager):
-    """
-    Custom User Manager to handle user and superuser creation:
-    tailored to seamlessly intercept strings and auto-create Organization objects.
-    """
-
-    def create_user(
-        self, username, email, full_name, org, password=None, **extra_fields
-    ):
-        """
-        Creates, saves, and returns a user with the given credentials.
-
-        Automatically resolves or creates the required Organization if
-        a string is provided given the organization does not exist yet.
-        """
-        if not email:
-            raise ValueError("Users must have an email address.")
-
-        email = self.normalize_email(email)
-
-        Organization = apps.get_model("organizations", "Organization")
-
-        if isinstance(org, str):
-            org_instance, created = Organization.objects.get_or_create(org_name=org)
-            org = org_instance
-        elif isinstance(org, int):
-            org = Organization.objects.get(pk=org)
-
-        user = self.model(
-            username=username, email=email, full_name=full_name, org=org, **extra_fields
-        )
-        user.set_password(password)
-        user.save(using=self._db)
-
-        return user
-
-    def create_superuser(
-        self, username, email, full_name, password=None, **extra_fields
-    ):
-        """
-        Creates and returns a superuser. Automatically assigns the user to a
-        default "Admin HQ" organization to bypass CLI foreign key restrictions.
-        """
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
-
-        return self.create_user(
-            username,
-            email,
-            full_name,
-            org="Admin HQ",
-            password=password,
-            **extra_fields,
-        )
+from .managers import UserManager
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    """
-    Custom user model representing system accounts.
-    Enforces a mandatory relationship with an Organization.
-    """
+class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
+    """Custom user model with organization membership."""
 
-    user_id = models.BigAutoField(primary_key=True)
-    org = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="users"
-    )
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
-
+    org = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="users"
+    )
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email", "full_name"]
-
-    objects = CustomUserManager()
+    objects = UserManager()
 
     def __str__(self):
-        """Returns the user's full name alongside their username."""
-
+        """Return user's full name and username."""
         return f"{self.full_name} ({self.username})"
 
 
-class UserCredentialInvite(models.Model):
-    """
-    Represents an invitation sent to a prospective user, complete with
-    a secure token, expiration time, and acceptance status.
-    """
+class UserInvitation(TimeStampedModel, OrganizationOwnedModel):
+    """Invitation sent to a prospective user."""
 
-    STATUS_CHOICES = [
-        ("PENDING", "Pending"),
-        ("ACCEPTED", "Accepted"),
-        ("EXPIRED", "Expired"),
-    ]
-
-    invite_id = models.BigAutoField(primary_key=True)
-    org = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="invites"
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="invitation"
     )
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="invite")
     invite_token = models.CharField(max_length=255, unique=True)
     invite_status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default="PENDING"
+        max_length=20,
+        choices=InvitationStatus.choices,
+        default=InvitationStatus.PENDING,
     )
     accepted_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="sent_invitations",
+    )
 
     def __str__(self):
-        """Returns a formatted string containing the invite token and target email."""
-
-        return f"Invite {self.invite_token} for {self.user.email}"
+        """Return invitation token and target email."""
+        return f"Invitation {self.invite_token} for {self.user.email}"
