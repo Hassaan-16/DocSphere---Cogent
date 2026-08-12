@@ -1,41 +1,57 @@
+"""Serializers for organizations."""
+
 from rest_framework import serializers
-from .models import Organization, OrganizationSubscription
 
-
-class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the OrganizationSubscription model.
-
-    Extracts read-only fields directly from the linked Stripe subscription object
-    to provide the client with plan names, status, and renewal dates.
-    """
-
-    status = serializers.CharField(source="stripe_subscription.status", read_only=True)
-    current_period_end = serializers.DateTimeField(
-        source="stripe_subscription.current_period_end", read_only=True
-    )
-    plan_name = serializers.CharField(
-        source="stripe_subscription.plan.product.name", read_only=True, default="N/A"
-    )
-
-    class Meta:
-        model = OrganizationSubscription
-        fields = [
-            "stripe_subscription",
-            "org",
-            "status",
-            "plan_name",
-            "current_period_end",
-        ]
-        read_only_fields = ["stripe_subscription", "org"]
+from .models import Organization
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the core Organization model.
-    """
+    """Serializer for the Organization model."""
+
+    subscription_status = serializers.CharField(
+        source="subscription_status", read_only=True
+    )
+    current_plan_name = serializers.CharField(
+        source="current_plan_name", read_only=True
+    )
+    current_period_end = serializers.DateTimeField(
+        source="current_period_end", read_only=True
+    )
 
     class Meta:
         model = Organization
-        fields = ["org_id", "org_name", "created_at"]
-        read_only_fields = ["org_id", "created_at"]
+        fields = [
+            "id",
+            "org_name",
+            "created_at",
+            "updated_at",
+            "subscription_status",
+            "current_plan_name",
+            "current_period_end",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
+    """Serializer for organization subscription details."""
+
+    subscription_status = serializers.CharField(
+        source="subscription_status", read_only=True
+    )
+    current_plan_name = serializers.CharField(
+        source="current_plan_name", read_only=True
+    )
+    current_period_end = serializers.DateTimeField(
+        source="current_period_end", read_only=True
+    )
+
+    class Meta:
+        model = Organization
+        fields = [
+            "id",
+            "org_name",
+            "subscription_status",
+            "current_plan_name",
+            "current_period_end",
+        ]
+        read_only_fields = ["id", "org_name"]

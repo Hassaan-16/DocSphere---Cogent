@@ -1,14 +1,15 @@
-from django.db import models
+"""Document models."""
+
 from django.conf import settings
+from django.db import models
+
+from core.constants.permissions import PermissionLevel
+from core.models.abstract import TimeStampedModel
 
 
-class Document(models.Model):
-    """
-    Represents an individual document containing content text.
-    Must be nested beneath a parent Project.
-    """
+class Document(TimeStampedModel):
+    """Document belonging to a project."""
 
-    document_id = models.BigAutoField(primary_key=True)
     project = models.ForeignKey(
         "projects.Project", on_delete=models.CASCADE, related_name="documents"
     )
@@ -26,27 +27,20 @@ class Document(models.Model):
         null=True,
         related_name="updated_documents",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        """Returns the document's title."""
-
+        """Return the document title."""
         return self.document_title
 
+    @property
+    def org(self):
+        """Return the organization via the project."""
+        return self.project.org
 
-class DocumentShare(models.Model):
-    """
-    Manages granular access control (Viewer, Editor) granted to
-    specific users for an individual Document.
-    """
 
-    PERMISSION_CHOICES = [
-        ("VIEWER", "Viewer"),
-        ("EDITOR", "Editor"),
-    ]
+class DocumentShare(TimeStampedModel):
+    """Share permissions for a document."""
 
-    document_share_id = models.BigAutoField(primary_key=True)
     document = models.ForeignKey(
         Document, on_delete=models.CASCADE, related_name="shares"
     )
@@ -55,11 +49,17 @@ class DocumentShare(models.Model):
         on_delete=models.CASCADE,
         related_name="document_shares",
     )
-    permission_level = models.CharField(max_length=50, choices=PERMISSION_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    permission_level = models.CharField(max_length=20, choices=PermissionLevel.choices)
+    granted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="granted_document_shares",
+    )
+
+    class Meta:
+        unique_together = ["document", "grantee_user"]
 
     def __str__(self):
-        """Returns the grantee's username, document title, and permission level."""
-
+        """Return grantee, document title, and permission level."""
         return f"{self.grantee_user.username} - {self.document.document_title} ({self.permission_level})"
