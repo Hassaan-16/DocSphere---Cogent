@@ -2,6 +2,12 @@
 
 from rest_framework import serializers
 
+from .constants import (
+    DOCUMENT_FIELDS,
+    DOCUMENT_READ_ONLY_FIELDS,
+    DOCUMENT_SHARE_FIELDS,
+    DOCUMENT_SHARE_READ_ONLY_FIELDS,
+)
 from core.constants.permissions import DOCUMENT_PERMISSIONS
 from .models import Document, DocumentShare
 
@@ -11,23 +17,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Document
-        fields = [
-            "id",
-            "project",
-            "document_title",
-            "content_text",
-            "created_by_user",
-            "last_updated_by_user",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = [
-            "id",
-            "created_by_user",
-            "last_updated_by_user",
-            "created_at",
-            "updated_at",
-        ]
+        fields = [DOCUMENT_FIELDS]
+        read_only_fields = [DOCUMENT_READ_ONLY_FIELDS]
 
 
 class DocumentShareSerializer(serializers.ModelSerializer):
@@ -37,13 +28,5 @@ class DocumentShareSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DocumentShare
-        fields = [
-            "id",
-            "document",
-            "grantee_user",
-            "permission_level",
-            "granted_by",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "granted_by", "created_at", "updated_at"]
+        fields = [DOCUMENT_SHARE_FIELDS]
+        read_only_fields = [DOCUMENT_SHARE_READ_ONLY_FIELDS]

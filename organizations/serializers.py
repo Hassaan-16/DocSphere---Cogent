@@ -2,6 +2,12 @@
 
 from rest_framework import serializers
 
+from .constants import (
+    ORGANIZATION_FIELDS,
+    ORGANIZATION_READ_ONLY_FIELDS,
+    ORGANIZATION_SUBSCRIPTION_FIELDS,
+    ORGANIZATION_SUBSCRIPTION_READ_ONLY_FIELDS,
+)
 from .models import Organization
 
 
@@ -20,16 +26,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Organization
-        fields = [
-            "id",
-            "org_name",
-            "created_at",
-            "updated_at",
-            "subscription_status",
-            "current_plan_name",
-            "current_period_end",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        fields = [ORGANIZATION_FIELDS]
+        read_only_fields = [ORGANIZATION_READ_ONLY_FIELDS]
 
 
 class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
@@ -47,11 +45,5 @@ class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Organization
-        fields = [
-            "id",
-            "org_name",
-            "subscription_status",
-            "current_plan_name",
-            "current_period_end",
-        ]
-        read_only_fields = ["id", "org_name"]
+        fields = [ORGANIZATION_SUBSCRIPTION_FIELDS]
+        read_only_fields = [ORGANIZATION_SUBSCRIPTION_READ_ONLY_FIELDS]

@@ -2,6 +2,10 @@
 
 from rest_framework import serializers
 
+from .constants import (
+    USER_FIELDS,
+    USER_READ_ONLY_FIELDS,
+)
 from .models import User
 
 
@@ -10,15 +14,5 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
-            "id",
-            "username",
-            "email",
-            "full_name",
-            "org",
-            "is_active",
-            "is_staff",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        fields = [USER_FIELDS]
+        read_only_fields = [USER_READ_ONLY_FIELDS]

@@ -2,6 +2,12 @@
 
 from rest_framework import serializers
 
+from .constants import (
+    PROJECT_FIELDS,
+    PROJECT_READ_ONLY_FIELDS,
+    PROJECT_SHARE_FIELDS,
+    PROJECT_SHARE_READ_ONLY_FIELDS,
+)
 from .models import Project, ProjectShare
 from core.constants.permissions import PROJECT_PERMISSIONS
 
@@ -11,16 +17,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = [
-            "id",
-            "project_name",
-            "description",
-            "org",
-            "created_by_user",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "org", "created_by_user", "created_at", "updated_at"]
+        fields = [PROJECT_FIELDS]
+        read_only_fields = [PROJECT_READ_ONLY_FIELDS]
 
 
 class ProjectShareSerializer(serializers.ModelSerializer):
@@ -30,13 +28,5 @@ class ProjectShareSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProjectShare
-        fields = [
-            "id",
-            "project",
-            "grantee_user",
-            "permission_level",
-            "granted_by",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "granted_by", "created_at", "updated_at"]
+        fields = [PROJECT_SHARE_FIELDS]
+        read_only_fields = [PROJECT_SHARE_READ_ONLY_FIELDS]
