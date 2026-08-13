@@ -3,6 +3,13 @@
 from django.conf import settings
 from django.db import models
 
+from .constants import (
+    CREATED_PROJECTS,
+    SHARES,
+    PROJECT_SHARES,
+    GRANTED_PROJECT_SHARES,
+    PROJECT_COMPOSITE_KEY,
+)
 from core.constants.permissions import PermissionLevel
 from core.models.abstract import OrganizationOwnedModel, TimeStampedModel
 
@@ -16,7 +23,7 @@ class Project(TimeStampedModel, OrganizationOwnedModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name="created_projects",
+        related_name=CREATED_PROJECTS,
     )
 
     def __str__(self):
@@ -27,24 +34,22 @@ class Project(TimeStampedModel, OrganizationOwnedModel):
 class ProjectShare(TimeStampedModel):
     """Share permissions for a project."""
 
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="shares"
-    )
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name=SHARES)
     grantee_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="project_shares",
+        related_name=PROJECT_SHARES,
     )
     permission_level = models.CharField(max_length=20, choices=PermissionLevel.choices)
     granted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name="granted_project_shares",
+        related_name=GRANTED_PROJECT_SHARES,
     )
 
     class Meta:
-        unique_together = ["project", "grantee_user"]
+        unique_together = PROJECT_COMPOSITE_KEY
 
     def __str__(self):
         """Return grantee, project name, and permission level."""

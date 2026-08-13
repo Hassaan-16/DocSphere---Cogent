@@ -19,3 +19,15 @@ ORGANIZATION_SUBSCRIPTION_FIELDS = [
 ]
 
 ORGANIZATION_SUBSCRIPTION_READ_ONLY_FIELDS = ["id", "org_name"]
+
+ACTIVE_STATE = "active"
+
+PLAN_PRODUCT = "plan__product"
+
+ORGANIZATION_ABBR = "org"
+
+SUBSCRIPTION_STATUS = "subscription_status"
+
+CURRENT_PLAN_NAME = "current_plan_name"
+
+CURRENT_PERIOD_END = "current_period_end"

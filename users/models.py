@@ -7,6 +7,12 @@ from django.db import models
 from core.constants.invitations import InvitationStatus
 from core.models.abstract import OrganizationOwnedModel, TimeStampedModel
 
+from .constants import (
+    USER_NAME,
+    REQUIRED_USER_FIELDS,
+    INVITATION,
+    SENT_INVITATION,
+)
 from .managers import UserManager
 
 
@@ -22,8 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email", "full_name"]
+    USERNAME_FIELD = USER_NAME
+    REQUIRED_FIELDS = REQUIRED_USER_FIELDS
     objects = UserManager()
 
     def __str__(self):
@@ -34,9 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 class UserInvitation(TimeStampedModel, OrganizationOwnedModel):
     """Invitation sent to a prospective user."""
 
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="invitation"
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name=INVITATION)
     invite_token = models.CharField(max_length=255, unique=True)
     invite_status = models.CharField(
         max_length=20,
@@ -49,7 +53,7 @@ class UserInvitation(TimeStampedModel, OrganizationOwnedModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name="sent_invitations",
+        related_name=SENT_INVITATION,
     )
 
     def __str__(self):

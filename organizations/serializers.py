@@ -7,6 +7,9 @@ from .constants import (
     ORGANIZATION_READ_ONLY_FIELDS,
     ORGANIZATION_SUBSCRIPTION_FIELDS,
     ORGANIZATION_SUBSCRIPTION_READ_ONLY_FIELDS,
+    SUBSCRIPTION_STATUS,
+    CURRENT_PLAN_NAME,
+    CURRENT_PERIOD_END,
 )
 from .models import Organization
 
@@ -15,13 +18,11 @@ class OrganizationSerializer(serializers.ModelSerializer):
     """Serializer for the Organization model."""
 
     subscription_status = serializers.CharField(
-        source="subscription_status", read_only=True
+        source=SUBSCRIPTION_STATUS, read_only=True
     )
-    current_plan_name = serializers.CharField(
-        source="current_plan_name", read_only=True
-    )
+    current_plan_name = serializers.CharField(source=CURRENT_PLAN_NAME, read_only=True)
     current_period_end = serializers.DateTimeField(
-        source="current_period_end", read_only=True
+        source=CURRENT_PERIOD_END, read_only=True
     )
 
     class Meta:
@@ -34,13 +35,11 @@ class OrganizationSubscriptionSerializer(serializers.ModelSerializer):
     """Serializer for organization subscription details."""
 
     subscription_status = serializers.CharField(
-        source="subscription_status", read_only=True
+        source=SUBSCRIPTION_STATUS, read_only=True
     )
-    current_plan_name = serializers.CharField(
-        source="current_plan_name", read_only=True
-    )
+    current_plan_name = serializers.CharField(source=CURRENT_PLAN_NAME, read_only=True)
     current_period_end = serializers.DateTimeField(
-        source="current_period_end", read_only=True
+        source=CURRENT_PERIOD_END, read_only=True
     )
 
     class Meta:

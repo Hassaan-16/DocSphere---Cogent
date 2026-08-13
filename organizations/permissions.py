@@ -1,5 +1,6 @@
 """Custom permissions for organization-based access control."""
 
+from .constants import ACTIVE_STATE, ORGANIZATION_ABBR
 from rest_framework import permissions
 
 
@@ -13,7 +14,7 @@ class IsSubscriptionActive(permissions.BasePermission):
         if request.user.is_superuser:
             return True
 
-        if not hasattr(request.user, "org") or not request.user.org:
+        if not hasattr(request.user, ORGANIZATION_ABBR) or not request.user.org:
             return False
 
-        return request.user.org.subscription_status == "active"
+        return request.user.org.subscription_status == ACTIVE_STATE

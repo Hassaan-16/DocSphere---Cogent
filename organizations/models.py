@@ -3,6 +3,10 @@
 from djstripe.models import Customer
 from django.db import models
 
+from .constants import (
+    ACTIVE_STATE,
+    PLAN_PRODUCT,
+)
 from core.models.abstract import TimeStampedModel
 
 
@@ -22,9 +26,10 @@ class Organization(TimeStampedModel):
 
         try:
             customer = Customer.objects.get(id=self.stripe_customer_id)
+
             return (
-                customer.subscriptions.filter(status="active")
-                .select_related("plan__product")
+                customer.subscriptions.filter(status=ACTIVE_STATE)
+                .select_related(PLAN_PRODUCT)
                 .first()
             )
 
@@ -35,18 +40,21 @@ class Organization(TimeStampedModel):
     def subscription_status(self):
         """Return the status of the active subscription."""
         sub = self.active_subscription
+
         return sub.status if sub else None
 
     @property
     def current_plan_name(self):
         """Return the name of the current subscription plan."""
         sub = self.active_subscription
+
         return sub.plan.product.name if sub and sub.plan else None
 
     @property
     def current_period_end(self):
         """Return the end date of the current subscription period."""
         sub = self.active_subscription
+
         return sub.current_period_end if sub else None
 
     def __str__(self):

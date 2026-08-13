@@ -3,6 +3,13 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
+from .constants import (
+    PROJECT,
+    GRANTEE_USER,
+    ACCESS_GRANTED_BY,
+    ORGANIZATION_ABBR,
+    CREATED_BY_USER,
+)
 from .models import Project, ProjectShare
 from .serializers import ProjectSerializer, ProjectShareSerializer
 from organizations.mixins import ActiveSubscriptionMixin
@@ -17,7 +24,7 @@ class ProjectViewSet(ActiveSubscriptionMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         """Return projects filtered by the requesting user's organization."""
         return Project.objects.filter(org=self.request.user.org).select_related(
-            "org", "created_by_user"
+            ORGANIZATION_ABBR, CREATED_BY_USER
         )
 
     def perform_create(self, serializer):
@@ -35,4 +42,4 @@ class ProjectShareViewSet(ActiveSubscriptionMixin, viewsets.ModelViewSet):
         """Return project shares filtered by the requesting user's organization."""
         return ProjectShare.objects.filter(
             project__org=self.request.user.org
-        ).select_related("project", "grantee_user", "granted_by")
+        ).select_related(PROJECT, GRANTEE_USER, ACCESS_GRANTED_BY)
