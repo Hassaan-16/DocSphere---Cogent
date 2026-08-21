@@ -19,20 +19,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
 SECRET_KEY = os.environ.get("DJ_SECRET_KEY", "dev-secret-key")
-
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
 STRIPE_TEST_PUBLIC_KEY = "pk_test_placeholder"
-
 STRIPE_TEST_SECRET_KEY = "sk_test_placeholder"
-
 STRIPE_LIVE_MODE = False
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+ALLOWED_HOSTS = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver"
+).split(",")
 
 # Application definition
 AUTH_USER_MODEL = "users.User"
@@ -91,8 +90,8 @@ REST_FRAMEWORK = {
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database
 
+# Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
@@ -102,8 +101,8 @@ DATABASES = {
     }
 }
 
-# Password validation
 
+# Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -130,8 +129,8 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# Internationalization
 
+# Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
@@ -142,11 +141,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "/app/staticfiles"
